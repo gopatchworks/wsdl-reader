@@ -1,5 +1,5 @@
 {
-    "name": "php-soap/wsdl-reader",
+    "name": "gopatchworks/wsdl-reader",
     "description": "A WSDL reader in PHP",
     "type": "library",
     "autoload": {
