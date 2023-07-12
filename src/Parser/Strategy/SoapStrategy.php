@@ -40,12 +40,14 @@ final class SoapStrategy implements StrategyInterface
     public function parseMessageImplementation(Document $wsdl, DOMElement $message): MessageImplementation
     {
         $body = locate_by_tag_name($message, 'body')->item(0);
+        $header = locate_by_tag_name($message, 'header')->item(0);
         if (!$body) {
             return new SoapMessage(bindingUse: BindingUse::LITERAL);
         }
 
         return new SoapMessage(
             bindingUse: BindingUse::tryFrom($body->getAttribute('use')) ?? BindingUse::LITERAL,
+            header: $header
         );
     }
 
