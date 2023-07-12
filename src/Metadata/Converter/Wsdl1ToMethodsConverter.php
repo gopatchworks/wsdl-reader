@@ -16,6 +16,7 @@ use Soap\WsdlReader\Metadata\Converter\Methods\Converter\MessageToMetadataTypesC
 use Soap\WsdlReader\Metadata\Converter\Methods\Detector\OperationMessagesDetector;
 use Soap\WsdlReader\Metadata\Converter\Methods\MethodsConverterContext;
 use Soap\WsdlReader\Model\Definitions\BindingOperation;
+use Soap\WsdlReader\Model\Definitions\Parts;
 use Soap\WsdlReader\Model\Service\Wsdl1SelectedService;
 use Soap\WsdlReader\Model\Wsdl1;
 use function Psl\Fun\pipe;
@@ -42,6 +43,11 @@ final class Wsdl1ToMethodsConverter
         $portTypeOperation = $service->portType->operations->lookupByName($operationName)->unwrapOr(null);
         if (!$portTypeOperation) {
             return null;
+        }
+
+        if (!is_null($bindingOperation->input->implementation->header)) {
+            $messageName = mb_substr(mb_stristr($bindingOperation->input->implementation->header->getAttribute('message'), ':'), 1);
+            $headerMessage = $service->messages->lookupByName($messageName)->unwrapOr(null);
         }
 
         ['input' => $inputMessage, 'output' => $outputMessage] = (new OperationMessagesDetector())($service, $portTypeOperation);
@@ -74,6 +80,7 @@ final class Wsdl1ToMethodsConverter
         return $configure(
             new Method(
                 $operationName,
+                $headerMessage->parts ?? new Parts(),
                 new ParameterCollection(...$parameters->unwrap()),
                 $returnType->unwrap()
             )
