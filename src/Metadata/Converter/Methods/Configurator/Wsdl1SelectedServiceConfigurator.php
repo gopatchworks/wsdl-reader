@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Soap\WsdlReader\Metadata\Converter\Methods\Configurator;
 
-use Soap\Engine\Metadata\Model\Method;
+use Soap\WsdlReader\Metadata\Method;
 use Soap\WsdlReader\Model\Service\Wsdl1SelectedService;
 use function Psl\Fun\pipe;
 
