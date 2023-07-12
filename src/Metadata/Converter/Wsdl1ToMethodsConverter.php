@@ -5,7 +5,7 @@ namespace Soap\WsdlReader\Metadata\Converter;
 
 use Soap\Engine\Metadata\Collection\MethodCollection;
 use Soap\Engine\Metadata\Collection\ParameterCollection;
-use Soap\Engine\Metadata\Model\Method;
+use Soap\WsdlReader\Metadata\Method;
 use Soap\Engine\Metadata\Model\Parameter;
 use Soap\Engine\Metadata\Model\XsdType;
 use Soap\WsdlReader\Locator\Wsdl1SelectedServiceLocator;
