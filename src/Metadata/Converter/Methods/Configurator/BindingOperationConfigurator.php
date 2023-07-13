@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Soap\WsdlReader\Metadata\Converter\Methods\Configurator;
 
-use Soap\WsdlReader\Metadata\Method;
+use Soap\Engine\Metadata\Model\Method;
 use Soap\Engine\Metadata\Model\MethodMeta;
 use Soap\WsdlReader\Model\Definitions\BindingOperation;
 use Soap\WsdlReader\Model\Definitions\BindingOperationMessage;
