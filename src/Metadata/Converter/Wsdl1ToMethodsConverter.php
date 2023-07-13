@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Soap\WsdlReader\Metadata\Converter;
 
+use Illuminate\Support\Arr;
 use Soap\Engine\Metadata\Collection\MethodCollection;
 use Soap\Engine\Metadata\Collection\ParameterCollection;
 use Soap\Engine\Metadata\Model\Method;
@@ -16,7 +17,6 @@ use Soap\WsdlReader\Metadata\Converter\Methods\Converter\MessageToMetadataTypesC
 use Soap\WsdlReader\Metadata\Converter\Methods\Detector\OperationMessagesDetector;
 use Soap\WsdlReader\Metadata\Converter\Methods\MethodsConverterContext;
 use Soap\WsdlReader\Model\Definitions\BindingOperation;
-use Soap\WsdlReader\Model\Definitions\Parts;
 use Soap\WsdlReader\Model\Service\Wsdl1SelectedService;
 use Soap\WsdlReader\Model\Wsdl1;
 use function Psl\Fun\pipe;
@@ -45,13 +45,13 @@ final class Wsdl1ToMethodsConverter
             return null;
         }
 
+        ['input' => $inputMessage, 'output' => $outputMessage] = (new OperationMessagesDetector())($service, $portTypeOperation);
+        $convertMessageToTypesDict = (new MessageToMetadataTypesConverter($context->types, $service->namespaces))(...);
         if (!is_null($bindingOperation->input->implementation->header)) {
             $messageName = mb_substr(mb_stristr($bindingOperation->input->implementation->header->getAttribute('message'), ':'), 1);
             $headerMessage = $service->messages->lookupByName($messageName)->unwrapOr(null);
+            $header = Arr::first($convertMessageToTypesDict($headerMessage));
         }
-
-        ['input' => $inputMessage, 'output' => $outputMessage] = (new OperationMessagesDetector())($service, $portTypeOperation);
-        $convertMessageToTypesDict = (new MessageToMetadataTypesConverter($context->types, $service->namespaces))(...);
 
         $parameters = $inputMessage->map($convertMessageToTypesDict)->mapOr(
             static fn (array $types) => map_with_key(
@@ -80,7 +80,7 @@ final class Wsdl1ToMethodsConverter
         return $configure(
             new Method(
                 $operationName,
-                $headerMessage->parts ?? new Parts(),
+                $header ?? null,
                 new ParameterCollection(...$parameters->unwrap()),
                 $returnType->unwrap()
             )
