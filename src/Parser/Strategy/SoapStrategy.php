@@ -12,10 +12,12 @@ use Soap\WsdlReader\Model\Definitions\Implementation\Message\MessageImplementati
 use Soap\WsdlReader\Model\Definitions\Implementation\Message\SoapMessage;
 use Soap\WsdlReader\Model\Definitions\Implementation\Operation\OperationImplementation;
 use Soap\WsdlReader\Model\Definitions\Implementation\Operation\SoapOperation;
+use Soap\WsdlReader\Model\Definitions\QNamed;
 use Soap\WsdlReader\Model\Definitions\SoapVersion;
 use Soap\WsdlReader\Model\Definitions\TransportType;
 use Soap\WsdlReader\Parser\Definitions\SoapVersionParser;
 use VeeWee\Xml\Dom\Document;
+use function Psl\Str\Byte\uppercase;
 use function VeeWee\Xml\Dom\Locator\Element\locate_by_tag_name;
 
 final class SoapStrategy implements StrategyInterface
@@ -33,20 +35,26 @@ final class SoapStrategy implements StrategyInterface
         return new SoapOperation(
             version: $this->parseVersionFromNode($wsdl, $operation),
             action: $operation->getAttribute('soapAction'),
-            style: BindingStyle::tryFrom($operation->getAttribute('style')) ?? BindingStyle::DOCUMENT,
+            style: BindingStyle::tryFrom(uppercase($operation->getAttribute('style'))) ?? BindingStyle::DOCUMENT,
         );
     }
 
     public function parseMessageImplementation(Document $wsdl, DOMElement $message): MessageImplementation
     {
         $body = locate_by_tag_name($message, 'body')->item(0);
-        $header = locate_by_tag_name($message, 'header')->item(0);
         if (!$body) {
             return new SoapMessage(bindingUse: BindingUse::LITERAL);
         }
 
+        $header = locate_by_tag_name($message, 'header')->item(0);
+        $namespace = $body->getAttribute('namespace') ?: null;
+        if (!empty($namespace)) {
+            $namespace = QNamed::parse($namespace);
+        }
+
         return new SoapMessage(
             bindingUse: BindingUse::tryFrom($body->getAttribute('use')) ?? BindingUse::LITERAL,
+            namespace: $namespace,
             header: $header
         );
     }
