@@ -80,9 +80,10 @@ final class Wsdl1ToMethodsConverter
         return $configure(
             new Method(
                 $operationName,
-                $header ?? null,
                 new ParameterCollection(...$parameters->unwrap()),
-                $returnType->unwrap()
+                $returnType->unwrap(),
+                $header ?? null,
+                $bindingOperation->input->implementation->namespace
             )
         );
     }
