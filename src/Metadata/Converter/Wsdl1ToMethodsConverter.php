@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Soap\WsdlReader\Metadata\Converter;
 
-use Illuminate\Support\Arr;
 use Soap\Engine\Metadata\Collection\MethodCollection;
 use Soap\Engine\Metadata\Collection\ParameterCollection;
 use Soap\Engine\Metadata\Model\Method;
@@ -47,10 +46,12 @@ final class Wsdl1ToMethodsConverter
 
         ['input' => $inputMessage, 'output' => $outputMessage] = (new OperationMessagesDetector())($service, $portTypeOperation);
         $convertMessageToTypesDict = (new MessageToMetadataTypesConverter($context->types, $service->namespaces))(...);
+        $headers = [];
         if (!is_null($bindingOperation->input->implementation->header)) {
             $messageName = mb_substr(mb_stristr($bindingOperation->input->implementation->header->getAttribute('message'), ':'), 1);
             $headerMessage = $service->messages->lookupByName($messageName)->unwrapOr(null);
-            $header = Arr::first($convertMessageToTypesDict($headerMessage));
+            $headers = collect($convertMessageToTypesDict($headerMessage))
+                ->map(static fn (XsdType $type, string $name) => new Parameter($name, $type));
         }
 
         $parameters = $inputMessage->map($convertMessageToTypesDict)->mapOr(
@@ -82,7 +83,7 @@ final class Wsdl1ToMethodsConverter
                 $operationName,
                 new ParameterCollection(...$parameters->unwrap()),
                 $returnType->unwrap(),
-                $header ?? null,
+                new ParameterCollection(...$headers),
                 $bindingOperation->input->implementation->namespace
             )
         );
