@@ -20,7 +20,7 @@
         "php-soap/wsdl": "^1.4",
         "veewee/xml": "^2.6",
         "azjezz/psl": "^2.4",
-        "symfony/console": "^6.2"
+        "symfony/console": "^7.0"
     },
     "require-dev": {
         "veewee/composer-run-parallel": "^1.2",
@@ -40,5 +40,11 @@
         "allow-plugins": {
             "veewee/composer-run-parallel": true
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:gopatchworks/soap-engine.git"
+        }
+    ]
 }
